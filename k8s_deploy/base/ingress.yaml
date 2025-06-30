@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    app: nylabankservice
+  name: nylabankservice
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: site.com                    # change this
+    http:
+      paths:
+      - backend:
+          service:
+            name: nylabankservice
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - site.com                        # change this
+    secretName: ssl-prod-nylabankservice            # change this

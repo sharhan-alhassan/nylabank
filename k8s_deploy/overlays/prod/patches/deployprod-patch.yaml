@@ -1,0 +1,15 @@
+- op: add
+  path: /spec/template/spec/containers/0/resources
+  value:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
+- op: add
+  path: /spec/template/spec/containers/0/envFrom
+  value:
+    - configMapRef:
+        name: nylabankservice-config

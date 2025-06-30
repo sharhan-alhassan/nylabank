@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to NylaBank{% endblock %}
+
+{% block preheader %}Welcome to NylaBank! Your account has been successfully activated{% endblock %}
+
+{% block content %}
+<p>Hi {{ first_name }},</p>
+
+<p>🎉 Welcome to NylaBank! Your account has been successfully activated and is ready to use.</p>
+
+<div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 24px 0;">
+  <h3 style="margin: 0 0 16px 0; color: #0867ec;">Your Account Information</h3>
+  
+  <table style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;"><strong>Name:</strong></td>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">{{ first_name }} {{ last_name }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;"><strong>Email:</strong></td>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">{{ email }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;"><strong>Account Type:</strong></td>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">{{ account_type|title }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;"><strong>Member Since:</strong></td>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">{{ join_date }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 0;"><strong>Status:</strong></td>
+      <td style="padding: 8px 0;"><span style="background-color: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Active</span></td>
+    </tr>
+  </table>
+</div>
+
+<p>We're excited to have you on board! Here's what you can do with your NylaBank account:</p>
+
+<ul style="margin: 16px 0; padding-left: 20px;">
+  <li style="margin: 8px 0;">Secure banking with bank-level security</li>
+  <li style="margin: 8px 0;">Fast transfers between accounts</li>
+  <li style="margin: 8px 0;">Smart analytics to track your spending</li>
+  <li style="margin: 8px 0;">24/7 customer support</li>
+</ul>
+
+<p>Complete your profile, add your first account, and start enjoying secure banking with NylaBank.</p>
+
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
+  <tbody>
+    <tr>
+      <td align="left">
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+          <tbody>
+            <tr>
+              <td> <a href="{{ dashboard_url|default('https://app.nylabank.com/dashboard') }}" target="_blank">Access Dashboard</a> </td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<p>If you have any questions, our support team is here to help at <a href="mailto:support@nylabank.com" class="text-link">support@nylabank.com</a></p>
+{% endblock %}
+
+{% block footer_text %}
+Welcome to NylaBank! We're committed to providing you with secure, fast, and reliable banking services. If you have any questions, our support team is here to help.
+{% endblock %} 

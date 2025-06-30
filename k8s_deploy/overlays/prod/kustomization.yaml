@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: maoney-prod
+
+resources:
+- namespace.yaml
+- hpa.yaml
+- ../../base
+
+patches:
+- path: patches/deployprod-patch.yaml
+  target:
+    group: apps
+    kind: Deployment
+    name: nylabankservice
+    version: v1
+
+- path: patches/ingress.yaml
+  target:
+    group: networking.k8s.io
+    kind: Ingress
+    name: nylabankservice
+    version: v1
+
+images:
+- name: nylabankservice

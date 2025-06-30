@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nylabankservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nylabankservice
+  template:
+    metadata:
+      labels:
+        app: nylabankservice
+    spec:
+      containers:
+      - name: nylabankservice
+        image: nylabankservice
+        ports:
+        - containerPort: 8000
+      restartPolicy: Always

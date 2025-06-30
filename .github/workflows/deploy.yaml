@@ -1,0 +1,116 @@
+name: nylabank-service
+
+on:
+  push:
+    branches: [ staging, main ]
+
+# Add permissions needed for OIDC
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    env:
+      AWS_REGION: us-west-1
+      EKS_CLUSTER_NAME: maoney-shared
+      ECR_REPOSITORY_NAME_PROD: nylabankservice-prod
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::170673730974:role/github-actions-deploy-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Create Prod ECR repo if necessary
+        id: ecr-repo-prod
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: byu-oit/github-action-create-ecr-repo-if-missing@v1
+        with:
+          DOCKER_REPO_NAME: ${{ env.ECR_REPOSITORY_NAME_PROD }}
+
+      - name: Automatic Tagging of Releases
+        uses: rymndhng/release-on-push-action@v0.25.0
+        id: tag-release
+        if: ${{ github.ref == 'refs/heads/main' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          bump_version_scheme: patch
+          release_body: "Official release at ${{ steps.tag-release.outputs.tag_name }}"
+
+      - name: Print Semver Version
+        run: |
+          echo ${{ steps.tag-release.outputs.tag_name }}
+
+      - name: Get Current Date
+        id: current-date
+        run: |
+          time=$(date +'%T')
+          echo "::set-output name=date::$(date +'%m-%d-%Y')-${time//:/-}"
+
+      - name: Build and Tag Prod Image
+        id: build-prod-image
+        if: ${{ github.ref == 'refs/heads/main' }}
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_URI: ${{ env.ECR_REPOSITORY_NAME_PROD  }}
+          IMAGE_TAG: ${{ steps.tag-release.outputs.tag_name }}
+        run: |
+          # Build a docker container and Tag
+          docker build -f Dockerfile \
+          -t $ECR_REGISTRY/$ECR_URI:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_URI:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_URI:$IMAGE_TAG"
+
+      - name: Setup kubeconfig
+        id: setup-kubeconfig
+        run: |
+          aws eks --region $AWS_REGION update-kubeconfig --name $EKS_CLUSTER_NAME
+
+      - name: Install kubectl
+        id: install-kubectl
+        run: |
+          curl -LO https://dl.k8s.io/release/v1.32.0/bin/linux/amd64/kubectl
+          chmod +x kubectl
+          mkdir -p ~/.local/bin
+          mv ./kubectl ~/.local/bin/kubectl
+          kubectl version --client
+
+      - name: Wait for service ingress to propagate
+        uses: jakejarvis/wait-action@v0.1.1
+        with:
+          time: "10s"
+
+      - name: Run Healthchecks
+        id: service-healthcheck
+        env:
+          NAMESPACE: ${{ github.ref == 'refs/heads/main' && 'maoney-prod' || 'maoney-staging' }}
+        run: |
+          pod_logs=$(kubectl get po -l app=nylabankservice -n $NAMESPACE -o jsonpath='{.items[0].metadata.name}')
+          kubectl logs po/$pod_logs -n $NAMESPACE
+          STATUS=$(kubectl get pods -l=app='nylabankservice' -n $NAMESPACE -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}')
+          echo $STATUS
+          for item in $STATUS
+          do
+            if [ $item == "True" ]
+            then
+              echo "Service is UP 🎉!!!"
+            else
+              echo "Service is DOWN 🙃"
+              exit 1
+            fi
+          done

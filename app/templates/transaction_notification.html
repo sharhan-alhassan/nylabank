@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Transaction Notification - NylaBank{% endblock %}
+
+{% block preheader %}Your {{ transaction_type|lower }} transaction has been completed successfully{% endblock %}
+
+{% block content %}
+<p>Hi {{ name }},</p>
+
+<p>Your {{ transaction_type|lower }} transaction has been completed successfully. Here are the details:</p>
+
+<div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 24px 0;">
+  <h3 style="margin: 0 0 16px 0; color: #0867ec;">Transaction Details</h3>
+  
+  <table style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;"><strong>Reference:</strong></td>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6; font-family: monospace;">{{ reference_number }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;"><strong>Type:</strong></td>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">{{ transaction_type|title }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;"><strong>Amount:</strong></td>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;"><strong>{{ amount }} {{ currency }}</strong></td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;"><strong>Account:</strong></td>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6; font-family: monospace;">{{ account_number }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;"><strong>Balance After:</strong></td>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;"><strong>{{ balance_after }} {{ currency }}</strong></td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;"><strong>Date:</strong></td>
+      <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">{{ transaction_date }}</td>
+    </tr>
+    {% if description %}
+    <tr>
+      <td style="padding: 8px 0;"><strong>Description:</strong></td>
+      <td style="padding: 8px 0;">{{ description }}</td>
+    </tr>
+    {% endif %}
+  </table>
+</div>
+
+{% if transaction_type == "TRANSFER" %}
+<div style="background-color: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 8px; padding: 16px; margin: 16px 0;">
+  <p style="margin: 0; color: #0066cc;"><strong>Transfer Details:</strong> From account ending in {{ from_account_last4 }} to account ending in {{ to_account_last4 }}.</p>
+</div>
+{% endif %}
+
+<p>If you don't recognize this transaction, please contact our support team immediately at <a href="mailto:support@nylabank.com" class="text-link">support@nylabank.com</a></p>
+
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
+  <tbody>
+    <tr>
+      <td align="left">
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+          <tbody>
+            <tr>
+              <td> <a href="{{ dashboard_url|default('https://nylabank.qa.maoney.co/dashboard') }}" target="_blank">View Dashboard</a> </td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block footer_text %}
+This transaction notification was sent for your NylaBank account. If you don't recognize this transaction, please contact our support team immediately.
+{% endblock %} 

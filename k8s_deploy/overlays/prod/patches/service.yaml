@@ -1,0 +1,3 @@
+- op: replace
+  path: /metadata/annotations/external-dns.alpha.kubernetes.io~1hostname
+  value: nylabankapi.prod.maoney.co

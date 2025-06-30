@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Account Activation - NylaBank{% endblock %}
+
+{% block preheader %}Verify your email address to activate your NylaBank account{% endblock %}
+
+{% block content %}
+<p>Hi {{ name }},</p>
+
+<p>Welcome to NylaBank! To complete your registration and activate your account, please enter the verification code below:</p>
+
+<div style="text-align: center; margin: 32px 0;">
+  <div style="background-color: #f8f9fa; border: 2px solid #0867ec; border-radius: 8px; padding: 24px; display: inline-block;">
+    <p style="margin: 0 0 8px 0; font-size: 14px; color: #6c757d;">Your verification code:</p>
+    <p style="margin: 0; font-size: 32px; font-weight: bold; font-family: 'Courier New', monospace; letter-spacing: 4px; color: #0867ec;">{{ verify_code }}</p>
+    <p style="margin: 8px 0 0 0; font-size: 12px; color: #6c757d;">This code will expire in 10 minutes</p>
+  </div>
+</div>
+
+<p>Enter this code in the verification page to activate your account. Once verified, you'll be able to access all NylaBank features.</p>
+
+<p>If you didn't create an account with us, please ignore this email and contact our support team immediately.</p>
+
+<p>Need help? Contact our support team at <a href="mailto:support@nylabank.com" class="text-link">support@nylabank.com</a></p>
+{% endblock %}
+
+{% block footer_text %}
+This verification code was requested for your NylaBank account. If you didn't create an account with us, please ignore this email and contact our support team immediately.
+{% endblock %}

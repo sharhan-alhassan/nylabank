@@ -12,7 +12,17 @@ A modern, secure banking API for user accounts, transactions, and admin operatio
 ## 📚 API Documentation
 
 - Interactive docs: `/docs` (Swagger UI)
+
+![User Registration](images/swagger.png)
+
 - Redoc: `/redoc`
+
+![Redoc ](images/redoc.png)
+
+- Scalar: `/scalar`
+
+![Interractive Docs & API Client](images/api_docs_scalar.png)
+
 - Versioned: `/api/v1/`
 
 ## 👤 User Creation Flow
@@ -30,8 +40,6 @@ A modern, secure banking API for user accounts, transactions, and admin operatio
 - **Transactions**: Deposit, withdraw, transfer, view history
 
 ![Welcome Notification](images/welcome_flash.png)
-
-<img src="images/welcome_phone_flash.png" alt="Architecture Overview" width="250"/>
 
 ![Welcome Notification](images/welcome_detail.png)
 

@@ -93,7 +93,7 @@ if settings.BACKEND_CORS_ORIGINS:
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-@app.get("/server", include_in_schema=False)
+@app.get("/scalar", include_in_schema=False)
 async def scalar_html():
     return get_scalar_api_reference(
         openapi_url=app.openapi_url,

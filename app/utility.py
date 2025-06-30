@@ -207,3 +207,50 @@ async def send_email_verification_code_legacy(data: Dict):
     Use send_email_verification_code instead.
     """
     return await send_email_verification_code(data)
+
+
+def render_registration_verification_email(name: str, verify_code: str) -> str:
+    """
+    Render the registration verification email template for testing.
+    """
+    template = template_env.get_template("registration_verification.html")
+    context = {
+        "name": name,
+        "verify_code": verify_code,
+    }
+    return template.render(**context)
+
+
+def render_transaction_notification_email(
+    name: str,
+    transaction_type: str,
+    reference_number: str,
+    amount: str,
+    currency: str,
+    account_number: str,
+    balance_after: str,
+    transaction_date: str,
+    description: str = None,
+    from_account_last4: str = None,
+    to_account_last4: str = None,
+    dashboard_url: str = None,
+) -> str:
+    """
+    Render the transaction notification email template for testing.
+    """
+    template = template_env.get_template("transaction_notification.html")
+    context = {
+        "name": name,
+        "transaction_type": transaction_type,
+        "reference_number": reference_number,
+        "amount": amount,
+        "currency": currency,
+        "account_number": account_number,
+        "balance_after": balance_after,
+        "transaction_date": transaction_date,
+        "description": description,
+        "from_account_last4": from_account_last4,
+        "to_account_last4": to_account_last4,
+        "dashboard_url": dashboard_url,
+    }
+    return template.render(**context)

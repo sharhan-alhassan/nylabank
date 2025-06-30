@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import pytest
+
 pytestmark = pytest.mark.asyncio
 
 """
@@ -21,7 +22,7 @@ async def test_email_config():
     """Test email configuration"""
     print("🧪 Testing Email Configuration")
     print("=" * 50)
-    
+
     print(f"MAIL_SERVER: {settings.MAIL_SERVER}")
     print(f"MAIL_PORT: {settings.MAIL_PORT}")
     print(f"MAIL_USERNAME: {settings.MAIL_USERNAME}")
@@ -31,7 +32,7 @@ async def test_email_config():
     print(f"MAIL_SSL_TLS: {settings.MAIL_SSL_TLS}")
     print(f"USE_CREDENTIALS: {settings.USE_CREDENTIALS}")
     print(f"VALIDATE_CERTS: {settings.VALIDATE_CERTS}")
-    
+
     print("\n" + "=" * 50)
     print("📧 Connection Configuration:")
     print(f"conf.MAIL_SERVER: {conf.MAIL_SERVER}")
@@ -42,7 +43,7 @@ async def test_email_config():
     print(f"conf.MAIL_STARTTLS: {conf.MAIL_STARTTLS}")
     print(f"conf.MAIL_SSL_TLS: {conf.MAIL_SSL_TLS}")
     print(f"conf.USE_CREDENTIALS: {conf.USE_CREDENTIALS}")
-    
+
     # Check for missing values
     missing_values = []
     if not settings.MAIL_USERNAME:
@@ -53,7 +54,7 @@ async def test_email_config():
         missing_values.append("MAIL_FROM")
     if not settings.MAIL_SERVER:
         missing_values.append("MAIL_SERVER")
-    
+
     if missing_values:
         print(f"\n❌ Missing email configuration: {', '.join(missing_values)}")
         return False
@@ -63,4 +64,4 @@ async def test_email_config():
 
 
 if __name__ == "__main__":
-    asyncio.run(test_email_config()) 
+    asyncio.run(test_email_config())

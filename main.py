@@ -149,3 +149,88 @@ app.include_router(
 @app.get("/health", tags=["health"])
 async def health_check():
     return {"status": "healthy"}
+
+
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
+async def landing_page():
+    return """
+    <!DOCTYPE html>
+    <html lang=\"en\">
+    <head>
+        <meta charset=\"UTF-8\">
+        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+        <title>NyLabank API Landing Page</title>
+        <style>
+            body {
+                background: #181c20;
+                color: #f3f3f3;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+            .container {
+                background: #23272b;
+                border-radius: 16px;
+                box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+                padding: 2.5rem 2rem 2rem 2rem;
+                max-width: 420px;
+                width: 90vw;
+                margin: 2rem auto;
+                text-align: center;
+            }
+            h1 {
+                margin-bottom: 0.5rem;
+                font-size: 2.2rem;
+                color: #4a90e2;
+            }
+            p {
+                color: #b0b8c1;
+                margin-bottom: 2rem;
+            }
+            .links {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            a {
+                background: #4a90e2;
+                color: #ffffff;
+                text-decoration: none;
+                padding: 0.75rem 1.5rem;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 1.1rem;
+                transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+                box-shadow: 0 2px 8px rgba(74,144,226,0.08);
+            }
+            a:hover {
+                background: #5ba0f2;
+                color: #ffffff;
+                box-shadow: 0 4px 16px rgba(74,144,226,0.18);
+            }
+            .footer {
+                margin-top: 2rem;
+                color: #6c757d;
+                font-size: 0.95rem;
+            }
+        </style>
+    </head>
+    <body>
+        <div class=\"container\">
+            <h1>NyLabank API</h1>
+            <p>Welcome to the NyLabank API. Choose a documentation below:</p>
+            <div class=\"links\">
+                <a href=\"/docs\">Swagger UI</a>
+                <a href=\"/redoc\">Redoc</a>
+                <a href=\"/scalar\">Scalar Docs</a>
+            </div>
+            <div class=\"footer\">&copy; 2024 NyLabank. All rights reserved.</div>
+        </div>
+    </body>
+    </html>
+    """

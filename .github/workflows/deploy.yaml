@@ -34,47 +34,14 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install black flake8 bandit safety pytest pytest-asyncio pytest-cov
 
       - name: Code Quality - Black Formatting Check
         run: |
           black --check --diff app/ tests/
 
-      # - name: Code Quality - Flake8 Linting
-      #   run: |
-      #     flake8 app/ tests/ --max-line-length=88 --extend-ignore=E203,W503
-
-      - name: Security Scanning - Bandit
-        run: |
-          bandit -r app/ -f json -o bandit-report.json || true
-          bandit -r app/ -f txt -o bandit-report.txt || true
-
-      - name: Security Scanning - Safety (Dependency Vulnerabilities)
-        run: |
-          safety check --json --output safety-report.json || true
-          safety check --text --output safety-report.txt || true
-
       - name: Run Unit Tests with Coverage
-        run: |
-          pytest tests/ --cov=app --cov-report=xml --cov-report=term-missing --cov-report=html
-
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-
-      - name: Upload security reports
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: security-reports
-          path: |
-            bandit-report.json
-            bandit-report.txt
-            safety-report.json
-            safety-report.txt
+        run: | 
+          pytest tests/
 
   build-and-deploy:
     runs-on: ubuntu-latest

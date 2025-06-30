@@ -89,6 +89,19 @@ jobs:
           mkdir -p ~/.local/bin
           mv ./kubectl ~/.local/bin/kubectl
           kubectl version --client
+      
+      - name: Deploy NylaBank Service Production
+        id: deploy-k8s-prod-yaml
+        if: ${{ github.ref == 'refs/heads/main' }}
+        env:
+          IMAGE_NAME: ${{ steps.build-prod-image.outputs.image }}
+          NAMESPACE: maoney-prod
+          ENVIRONMENT: prod
+        run: |
+          curl -s -o kustomize --location https://github.com/kubernetes-sigs/kustomize/releases/download/v5.4.2/kustomize_5.4.2_linux_amd64
+          chmod u+x ./kustomize
+          chmod +x deploy.sh
+          ./deploy.sh $ENVIRONMENT $IMAGE_NAME $NAMESPACE
 
       - name: Wait for service ingress to propagate
         uses: jakejarvis/wait-action@v0.1.1

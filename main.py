@@ -7,7 +7,7 @@ from app.api.v1.accounts import account_router
 from app.api.v1.transactions import transaction_router
 from app.api.v1.admin import admin_router
 
-# from scalar_fastapi import get_scalar_api_reference
+from scalar_fastapi import get_scalar_api_reference
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 
@@ -51,23 +51,23 @@ if settings.BACKEND_CORS_ORIGINS:
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-# @app.get("/server", include_in_schema=False)
-# async def scalar_html():
-#     return get_scalar_api_reference(
-#         openapi_url=app.openapi_url,
-#         title=app.title,
-#         show_sidebar=True,
-#         hide_download_button=True,
-#         hide_models=True,
-#         dark_mode=True,
-#         # hidden_clients=["python", "go"],
-#         servers=[
-#             {"url": "https://transactshield.tamale.forward.tiaspaces.com"},
-#             {"url": "http://localhost:8000"},
-#         ],
-#         default_open_all_tags=True,
-#         scalar_theme="",  # "alternate, default, moon, purple, solarized, bluePlanet, saturn, kepler, mars, deepSpace, none"
-#     )
+@app.get("/server", include_in_schema=False)
+async def scalar_html():
+    return get_scalar_api_reference(
+        openapi_url=app.openapi_url,
+        title=app.title,
+        show_sidebar=True,
+        hide_download_button=True,
+        hide_models=True,
+        dark_mode=True,
+        # hidden_clients=["python", "go"],
+        servers=[
+            {"url": "https://nylabankapi.prod.maoney.co"},
+            {"url": "http://localhost:8000"},
+        ],
+        default_open_all_tags=True,
+        scalar_theme="",  # "alternate, default, moon, purple, solarized, bluePlanet, saturn, kepler, mars, deepSpace, none"
+    )
 
     # # Inject the custom CSS file into the HTML
     # custom_css = '<link rel="stylesheet" href="/static/super_dark.css">'

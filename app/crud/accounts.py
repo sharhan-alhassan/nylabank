@@ -5,8 +5,11 @@ from app.models.account import Account
 from app.schemas.account import AccountCreate, AccountUpdate
 from app.crud.base_crud import BaseCRUD
 
+
 class CRUDAccount(BaseCRUD[Account, AccountCreate, AccountUpdate]):
-    async def get_by_account_number(self, db: AsyncSession, *, account_number: str) -> Optional[Account]:
+    async def get_by_account_number(
+        self, db: AsyncSession, *, account_number: str
+    ) -> Optional[Account]:
         query = select(Account).filter(Account.account_number == account_number)
         result = await db.execute(query)
         return result.scalars().first()
@@ -16,4 +19,5 @@ class CRUDAccount(BaseCRUD[Account, AccountCreate, AccountUpdate]):
         result = await db.execute(query)
         return result.scalars().all()
 
-account_crud = CRUDAccount(Account) 
+
+account_crud = CRUDAccount(Account)

@@ -22,10 +22,10 @@ def date_filter(value, format_str="%Y-%m-%d"):
         value = datetime.now()
     elif isinstance(value, str):
         try:
-            value = datetime.fromisoformat(value.replace('Z', '+00:00'))
+            value = datetime.fromisoformat(value.replace("Z", "+00:00"))
         except:
             return value
-    
+
     if isinstance(value, datetime):
         return value.strftime(format_str)
     return str(value)
@@ -45,13 +45,13 @@ conf = ConnectionConfig(
 )
 
 template_env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)))
-template_env.filters['date'] = date_filter
+template_env.filters["date"] = date_filter
 
 
 async def send_email_verification_code(data: Dict):
     """
     Send email verification code for account registration.
-    
+
     Args:
         data: Dictionary containing email details including:
             - verify_code: The verification code
@@ -82,7 +82,7 @@ async def send_email_verification_code(data: Dict):
 async def send_password_reset_email(data: Dict):
     """
     Send password reset verification code.
-    
+
     Args:
         data: Dictionary containing email details including:
             - reset_code: The password reset code
@@ -111,7 +111,7 @@ async def send_password_reset_email(data: Dict):
 async def send_transaction_notification(data: Dict):
     """
     Send transaction completion notification.
-    
+
     Args:
         data: Dictionary containing transaction details including:
             - email_to: Recipient's email address
@@ -141,7 +141,9 @@ async def send_transaction_notification(data: Dict):
         "description": data.get("description"),
         "from_account_last4": data.get("from_account_last4"),
         "to_account_last4": data.get("to_account_last4"),
-        "dashboard_url": data.get("dashboard_url", "https://app.nylabank.com/dashboard"),
+        "dashboard_url": data.get(
+            "dashboard_url", "https://app.nylabank.com/dashboard"
+        ),
     }
 
     html_content = template.render(**context)
@@ -160,7 +162,7 @@ async def send_transaction_notification(data: Dict):
 async def send_welcome_email(data: Dict):
     """
     Send welcome email after account activation.
-    
+
     Args:
         data: Dictionary containing user details including:
             - email_to: Recipient's email address
@@ -180,7 +182,9 @@ async def send_welcome_email(data: Dict):
         "email": data["email"],
         "account_type": data["account_type"],
         "join_date": data["join_date"],
-        "dashboard_url": data.get("dashboard_url", "https://nylabank.qa.maoney.co/dashboard"),
+        "dashboard_url": data.get(
+            "dashboard_url", "https://nylabank.qa.maoney.co/dashboard"
+        ),
     }
 
     html_content = template.render(**context)

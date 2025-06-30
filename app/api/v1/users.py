@@ -19,10 +19,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.core.deps import get_current_user
 from app.config import settings
 from app.utility import (
-    generate_otp_code, 
-    send_email_verification_code, 
+    generate_otp_code,
+    send_email_verification_code,
     send_password_reset_email,
-    send_welcome_email
+    send_welcome_email,
 )
 from datetime import datetime, timedelta
 from app.utilities.logger import logger
@@ -97,11 +97,8 @@ class UserRouter:
             summary="Confirm password reset with OTP",
         )
 
-
     async def register(
-        self, 
-        user_in: UserCreate, 
-        db: AsyncSession = Depends(get_async_session)
+        self, user_in: UserCreate, db: AsyncSession = Depends(get_async_session)
     ) -> Any:
         if user_in.password != user_in.confirm_password:
             raise HTTPException(status_code=400, detail="Passwords do not match")
@@ -128,7 +125,7 @@ class UserRouter:
         try:
             await send_email_verification_code(
                 {
-                    "verify_code": otp_code, 
+                    "verify_code": otp_code,
                     "email_to": user.email,
                     "name": user.first_name.title(),
                 }
@@ -139,8 +136,7 @@ class UserRouter:
         except Exception as e:
             logger.error(f"Failed to send registration otp: {str(e)}")
             raise HTTPException(
-                status_code=500, 
-                detail="Failed to send verification email"
+                status_code=500, detail="Failed to send verification email"
             )
 
     async def login(
@@ -148,25 +144,16 @@ class UserRouter:
         form_data: OAuth2PasswordRequestForm = Depends(),
         db: AsyncSession = Depends(get_async_session),
     ) -> Any:
-        existing_user = await user_crud.get_by_email(
-            db,
-            email=form_data.username
-        )
+        existing_user = await user_crud.get_by_email(db, email=form_data.username)
         if not existing_user:
-            raise HTTPException(
-                detail="User does not exists",
-                status_code=400
-            )
+            raise HTTPException(detail="User does not exists", status_code=400)
         user = await user_crud.authenticate(
-            db, 
-            email=form_data.username.lower(), 
+            db,
+            email=form_data.username.lower(),
             password=form_data.password,
         )
         if not user:
-            raise HTTPException(
-                status_code=400, 
-                detail="Incorrect email or password"
-            )
+            raise HTTPException(status_code=400, detail="Incorrect email or password")
 
         if not user.is_active:
             raise HTTPException(
@@ -176,15 +163,10 @@ class UserRouter:
 
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(user.id, access_token_expires)
-        return {
-            "access_token": access_token, 
-            "token_type": "bearer"
-        }
+        return {"access_token": access_token, "token_type": "bearer"}
 
     async def confirm_registration(
-        self, 
-        data: OtpConfirm, 
-        db: AsyncSession = Depends(get_async_session)
+        self, data: OtpConfirm, db: AsyncSession = Depends(get_async_session)
     ) -> Any:
         user = await user_crud.get_by_email(db, email=data.email)
         if not user:
@@ -214,15 +196,17 @@ class UserRouter:
 
         # Send welcome email
         try:
-            await send_welcome_email({
-                "email_to": user.email,
-                "first_name": user.first_name.title(),
-                "last_name": user.last_name.title(),
-                "email": user.email,
-                "account_type": user.role.value,
-                "join_date": user.created_at.strftime("%B %d, %Y"),
-                "dashboard_url": f"{settings.FRONTEND_URL}/dashboard",
-            })
+            await send_welcome_email(
+                {
+                    "email_to": user.email,
+                    "first_name": user.first_name.title(),
+                    "last_name": user.last_name.title(),
+                    "email": user.email,
+                    "account_type": user.role.value,
+                    "join_date": user.created_at.strftime("%B %d, %Y"),
+                    "dashboard_url": f"{settings.FRONTEND_URL}/dashboard",
+                }
+            )
         except Exception as e:
             logger.error(f"Failed to send welcome email: {str(e)}")
 
@@ -263,7 +247,7 @@ class UserRouter:
             try:
                 await send_email_verification_code(
                     {
-                        "verify_code": otp_code, 
+                        "verify_code": otp_code,
                         "email_to": email,
                         "name": name,
                     }
@@ -271,8 +255,13 @@ class UserRouter:
                 logger.info(f"OTP successfully sent to {email}")
             except Exception as e:
                 logger.error(f"Email sending error: {str(e)}")
-                
-        background_tasks.add_task(send_email_task, otp_code=otp_code, email=email, name=user.first_name.title())
+
+        background_tasks.add_task(
+            send_email_task,
+            otp_code=otp_code,
+            email=email,
+            name=user.first_name.title(),
+        )
 
         return {
             "detail": "OTP sent. Check your email to activate your account.",
@@ -294,9 +283,7 @@ class UserRouter:
         user = await user_crud.get_by_email(db, email=data.email)
         if not user:
             # Don't reveal if user exists or not for security
-            return {
-                "detail": "A password reset code has been sent to your email."
-            }
+            return {"detail": "A password reset code has been sent to your email."}
 
         # Delete existing OTP for this email
         existing_otp = await otp_crud.get_by(db=db, filters={"email": data.email})
@@ -309,7 +296,8 @@ class UserRouter:
         new_otp = OtpCreate(
             email=data.email,
             otp_code=reset_code,
-            expires_on=datetime.utcnow() + timedelta(minutes=15),  # 15 minutes for password reset
+            expires_on=datetime.utcnow()
+            + timedelta(minutes=15),  # 15 minutes for password reset
             is_expired=False,
         )
 
@@ -317,19 +305,18 @@ class UserRouter:
 
         async def send_reset_email_task(reset_code: str, email: str):
             try:
-                await send_password_reset_email({
-                    "reset_code": reset_code,
-                    "email_to": email
-                })
+                await send_password_reset_email(
+                    {"reset_code": reset_code, "email_to": email}
+                )
                 logger.info(f"Password reset email successfully sent to {email}")
             except Exception as e:
                 logger.error(f"Password reset email sending error: {str(e)}")
 
-        background_tasks.add_task(send_reset_email_task, reset_code=reset_code, email=data.email)
+        background_tasks.add_task(
+            send_reset_email_task, reset_code=reset_code, email=data.email
+        )
 
-        return {
-            "detail": "A password reset code has been sent to your email."
-        }
+        return {"detail": "A password reset code has been sent to your email."}
 
     async def confirm_password_reset(
         self,
@@ -346,13 +333,15 @@ class UserRouter:
         otp = await otp_crud.get_by(db=db, filters={"email": data.email})
         if not otp:
             raise HTTPException(
-                status_code=400, detail="Reset code not found. Please request a new one."
+                status_code=400,
+                detail="Reset code not found. Please request a new one.",
             )
 
         if otp.is_expired or otp.expires_on < datetime.utcnow():
             await otp_crud.update(db=db, db_obj=otp, obj_in={"is_expired": True})
             raise HTTPException(
-                status_code=400, detail="Reset code has expired. Please request a new one."
+                status_code=400,
+                detail="Reset code has expired. Please request a new one.",
             )
 
         if otp.otp_code != data.reset_code:
@@ -360,8 +349,11 @@ class UserRouter:
 
         # Update password
         from app.core.security import get_password_hash
+
         hashed_password = get_password_hash(data.new_password)
-        await user_crud.update(db=db, db_obj=user, obj_in={"hashed_password": hashed_password})
+        await user_crud.update(
+            db=db, db_obj=user, obj_in={"hashed_password": hashed_password}
+        )
 
         # Delete the OTP
         await otp_crud.delete(db=db, id=otp.id)
@@ -369,5 +361,6 @@ class UserRouter:
         return {
             "detail": "Password successfully reset. You can now login with your new password."
         }
+
 
 user_router = UserRouter()

@@ -12,7 +12,8 @@ from app.schemas.tokens import TokenPayloadSchema
 
 oauth2_scheme = OAuth2PasswordBearer(
     # The endpoing that returns the access_token, usually the /token or /login endpoints
-    tokenUrl=f"{settings.API_V1_STR}/users/login", scheme_name="JWT"
+    tokenUrl=f"{settings.API_V1_STR}/users/login",
+    scheme_name="JWT",
 )
 
 
@@ -54,6 +55,7 @@ async def get_current_user(
         raise credentials_exception
     return user
 
+
 async def get_current_admin(
     current_user: Annotated[User, Depends(get_current_user)],
 ) -> User:
@@ -61,9 +63,12 @@ async def get_current_admin(
         raise HTTPException(status_code=403, detail="Forbidden: You are not an admin")
     return current_user
 
+
 async def get_current_active_user(
-    current_user: Annotated[User, Depends(get_current_user)]
+    current_user: Annotated[User, Depends(get_current_user)],
 ):
     if not current_user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user: Your account is not active")
+        raise HTTPException(
+            status_code=400, detail="Inactive user: Your account is not active"
+        )
     return current_user

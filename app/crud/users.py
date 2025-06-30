@@ -6,6 +6,7 @@ from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
 from app.crud.base_crud import BaseCRUD
 
+
 class CRUDUser(BaseCRUD[User, UserCreate, UserUpdate]):
     async def get_by_email(self, db: AsyncSession, *, email: str) -> Optional[User]:
         query = select(User).filter(User.email == email)
@@ -17,13 +18,13 @@ class CRUDUser(BaseCRUD[User, UserCreate, UserUpdate]):
         address_dict = None
         if obj_in.address:
             address_dict = obj_in.address.model_dump()
-        
+
         # Convert timezone-aware datetime to timezone-naive if it exists
         date_of_birth = None
         if obj_in.date_of_birth:
             # Remove timezone info to make it timezone-naive
             date_of_birth = obj_in.date_of_birth.replace(tzinfo=None)
-        
+
         db_obj = User(
             email=obj_in.email,
             first_name=obj_in.first_name,
@@ -40,10 +41,10 @@ class CRUDUser(BaseCRUD[User, UserCreate, UserUpdate]):
         return db_obj
 
     async def authenticate(
-        self, 
-        db: AsyncSession, 
-        *, 
-        email: str, 
+        self,
+        db: AsyncSession,
+        *,
+        email: str,
         password: str,
     ) -> Optional[User]:
         user = await self.get_by_email(db, email=email)
@@ -52,5 +53,6 @@ class CRUDUser(BaseCRUD[User, UserCreate, UserUpdate]):
         if not verify_password(password, user.hashed_password):
             return None
         return user
+
 
 user_crud = CRUDUser(User)

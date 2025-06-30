@@ -5,11 +5,11 @@ from .transaction import Transaction, TransactionType, TransactionStatus
 
 __all__ = [
     "User",
-    "UserRole", 
+    "UserRole",
     "Account",
     "AccountType",
     "AccountStatus",
     "Transaction",
-    "TransactionType", 
-    "TransactionStatus"
+    "TransactionType",
+    "TransactionStatus",
 ]

@@ -11,7 +11,7 @@ class Address(BaseModel):
     state: str = Field(..., description="State or province")
     zip_code: str = Field(..., description="ZIP or postal code", alias="zipCode")
     country: str = Field(..., description="Country name")
-    
+
     class Config:
         populate_by_name = True
         json_schema_extra = {
@@ -20,7 +20,7 @@ class Address(BaseModel):
                 "city": "New York",
                 "state": "NY",
                 "zipCode": "10001",
-                "country": "United States"
+                "country": "United States",
             }
         }
 
@@ -88,8 +88,8 @@ class UserList(BaseSchema):
     per_page: int
     total_pages: int
     data: List[User]
-    
-    
+
+
 class PasswordResetRequest(BaseModel):
     email: str
 

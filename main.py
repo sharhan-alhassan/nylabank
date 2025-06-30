@@ -28,6 +28,7 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown
 
+
 app = FastAPI(
     title="NyLabank API",
     description=description,
@@ -77,6 +78,7 @@ async def scalar_html():
     # )
     # return HTMLResponse(content=modified_html_content)
 
+
 app.include_router(
     user_router.router,
     prefix=f"{settings.API_V1_STR}/users",
@@ -100,6 +102,7 @@ app.include_router(
     prefix=f"{settings.API_V1_STR}/admin",
     tags=["admin"],
 )
+
 
 @app.get("/health", tags=["health"])
 async def health_check():

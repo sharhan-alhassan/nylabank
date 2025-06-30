@@ -2,6 +2,7 @@ from sqlalchemy import String, DateTime, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base_class import Base, UUIDMixin
 
+
 class Otp(Base, UUIDMixin):
     __tablename__ = "otps"
 

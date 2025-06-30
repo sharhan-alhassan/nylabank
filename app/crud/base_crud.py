@@ -58,7 +58,7 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             if joins:
                 for join in joins:
                     query = query.options(joinedload(join))
-        
+
         result = await db.execute(query)
         return result.scalars().first()
 
@@ -159,39 +159,41 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def _build_filter_conditions(self, filters: Dict[str, Any]) -> List[Any]:
         conditions = []
         for key, value in filters.items():
-            if '__' in key:
-                parts = key.split('__')
+            if "__" in key:
+                parts = key.split("__")
                 field_name = parts[0]
                 operator = parts[1] if len(parts) > 1 else None
-                
+
                 if not hasattr(self.model, field_name):
                     continue  # Skip if field doesn't exist
-                
+
                 field = getattr(self.model, field_name)
-                
-                if operator == 'gte':
+
+                if operator == "gte":
                     conditions.append(field >= value)
-                elif operator == 'lte':
+                elif operator == "lte":
                     conditions.append(field <= value)
-                elif operator == 'gt':
+                elif operator == "gt":
                     conditions.append(field > value)
-                elif operator == 'lt':
+                elif operator == "lt":
                     conditions.append(field < value)
-                elif operator == 'ne':
+                elif operator == "ne":
                     conditions.append(field != value)
-                elif operator == 'in':
+                elif operator == "in":
                     conditions.append(field.in_(value))
-                elif operator == 'not_in':
+                elif operator == "not_in":
                     conditions.append(~field.in_(value))
-                elif operator == 'like':
+                elif operator == "like":
                     conditions.append(field.like(f"%{value}%"))
-                elif operator == 'ilike':
+                elif operator == "ilike":
                     conditions.append(field.ilike(f"%{value}%"))
                 else:
                     # Handle nested relationships (original logic)
                     attr = field
                     for part in parts[1:]:
-                        if hasattr(attr, 'property') and hasattr(attr.property, 'mapper'):
+                        if hasattr(attr, "property") and hasattr(
+                            attr.property, "mapper"
+                        ):
                             attr = getattr(attr.property.mapper.class_, part)
                         else:
                             attr = getattr(attr, part)
@@ -271,7 +273,9 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             refresh_relationships (Optional[List[str]]): List of relationship names to refresh after creation
         """
         try:
-            obj_in_data = obj_in.model_dump() if hasattr(obj_in, "model_dump") else obj_in
+            obj_in_data = (
+                obj_in.model_dump() if hasattr(obj_in, "model_dump") else obj_in
+            )
             db_obj = self.model(**obj_in_data)
             db.add(db_obj)
             await db.commit()
@@ -327,8 +331,8 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                     # Create new object if it doesn't exist
                     create_data = data if isinstance(data, dict) else data.model_dump()
                     # Handle foreign key relationships properly
-                    if hasattr(create_data, 'parent_id'):
-                        create_data['parent_id'] = parent_obj.id
+                    if hasattr(create_data, "parent_id"):
+                        create_data["parent_id"] = parent_obj.id
                     schema_instance = related_create_schema(**create_data)
                     existing_obj = await related_crud.create(db, obj_in=schema_instance)
 
@@ -336,9 +340,9 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
             # Handle different relationship types
             relationship_collection = getattr(parent_obj, relationship_name)
-            if hasattr(relationship_collection, 'extend'):
+            if hasattr(relationship_collection, "extend"):
                 relationship_collection.extend(related_objects)
-            elif hasattr(relationship_collection, 'update'):
+            elif hasattr(relationship_collection, "update"):
                 relationship_collection.update(related_objects)
             else:
                 # For one-to-many or one-to-one
@@ -507,15 +511,15 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             raise ValueError(f"Relationship {relationship_name} not found")
 
         # Handle different relationship types
-        if hasattr(relationship, 'append'):
+        if hasattr(relationship, "append"):
             if related_obj not in relationship:
                 relationship.append(related_obj)
-        elif hasattr(relationship, 'add'):
+        elif hasattr(relationship, "add"):
             relationship.add(related_obj)
         else:
             # For one-to-one relationships
             setattr(parent_obj, relationship_name, related_obj)
-        
+
         db.add(parent_obj)
         await db.commit()
         await db.refresh(parent_obj)

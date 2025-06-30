@@ -26,17 +26,17 @@ from app.core.security import get_password_hash
 
 class TestDataSeeder:
     """Helper class to create and clean up test data"""
-    
+
     def __init__(self):
         self.created_users = []
         self.created_accounts = []
         self.created_transactions = []
         self.created_otps = []
-    
+
     async def create_test_users(self, db) -> List[User]:
         """Create test users"""
         user_crud = BaseCRUD(User)
-        
+
         users_data = [
             {
                 "email": "john.doe@example.com",
@@ -49,11 +49,11 @@ class TestDataSeeder:
                     "city": "New York",
                     "state": "NY",
                     "zip_code": "10001",
-                    "country": "USA"
+                    "country": "USA",
                 },
                 "role": UserRole.CUSTOMER,
                 "is_active": True,
-                "hashed_password": get_password_hash("password123")
+                "hashed_password": get_password_hash("password123"),
             },
             {
                 "email": "jane.smith@example.com",
@@ -66,11 +66,11 @@ class TestDataSeeder:
                     "city": "Los Angeles",
                     "state": "CA",
                     "zip_code": "90210",
-                    "country": "USA"
+                    "country": "USA",
                 },
                 "role": UserRole.ADMIN,
                 "is_active": True,
-                "hashed_password": get_password_hash("password456")
+                "hashed_password": get_password_hash("password456"),
             },
             {
                 "email": "bob.wilson@example.com",
@@ -83,27 +83,27 @@ class TestDataSeeder:
                     "city": "Chicago",
                     "state": "IL",
                     "zip_code": "60601",
-                    "country": "USA"
+                    "country": "USA",
                 },
                 "role": UserRole.CUSTOMER,
                 "is_active": False,
-                "hashed_password": get_password_hash("password789")
-            }
+                "hashed_password": get_password_hash("password789"),
+            },
         ]
-        
+
         users = []
         for user_data in users_data:
             user_schema = UserCreate(**user_data)
             user = await user_crud.create(db, obj_in=user_schema)
             users.append(user)
             self.created_users.append(user)
-        
+
         return users
-    
+
     async def create_test_accounts(self, db, users: List[User]) -> List[Account]:
         """Create test accounts for users"""
         account_crud = BaseCRUD(Account)
-        
+
         accounts_data = [
             {
                 "user_id": users[0].id,
@@ -113,7 +113,7 @@ class TestDataSeeder:
                 "currency": "USD",
                 "status": AccountStatus.ACTIVE,
                 "overdraft_limit": Decimal("1000.00"),
-                "interest_rate": None
+                "interest_rate": None,
             },
             {
                 "user_id": users[0].id,
@@ -123,7 +123,7 @@ class TestDataSeeder:
                 "currency": "USD",
                 "status": AccountStatus.ACTIVE,
                 "overdraft_limit": Decimal("0.00"),
-                "interest_rate": Decimal("0.0250")
+                "interest_rate": Decimal("0.0250"),
             },
             {
                 "user_id": users[1].id,
@@ -133,7 +133,7 @@ class TestDataSeeder:
                 "currency": "USD",
                 "status": AccountStatus.ACTIVE,
                 "overdraft_limit": Decimal("5000.00"),
-                "interest_rate": None
+                "interest_rate": None,
             },
             {
                 "user_id": users[2].id,
@@ -143,23 +143,25 @@ class TestDataSeeder:
                 "currency": "USD",
                 "status": AccountStatus.FROZEN,
                 "overdraft_limit": Decimal("0.00"),
-                "interest_rate": Decimal("0.0300")
-            }
+                "interest_rate": Decimal("0.0300"),
+            },
         ]
-        
+
         accounts = []
         for account_data in accounts_data:
             account_schema = AccountCreate(**account_data)
             account = await account_crud.create(db, obj_in=account_schema)
             accounts.append(account)
             self.created_accounts.append(account)
-        
+
         return accounts
-    
-    async def create_test_transactions(self, db, accounts: List[Account]) -> List[Transaction]:
+
+    async def create_test_transactions(
+        self, db, accounts: List[Account]
+    ) -> List[Transaction]:
         """Create test transactions"""
         transaction_crud = BaseCRUD(Transaction)
-        
+
         transactions_data = [
             {
                 "from_account_id": None,
@@ -172,7 +174,7 @@ class TestDataSeeder:
                 "status": TransactionStatus.COMPLETED,
                 "balance_after": Decimal("6000.00"),
                 "transaction_metadata": {"source": "cash_deposit"},
-                "processed_at": datetime.now()
+                "processed_at": datetime.now(),
             },
             {
                 "from_account_id": accounts[0].id,
@@ -185,7 +187,7 @@ class TestDataSeeder:
                 "status": TransactionStatus.COMPLETED,
                 "balance_after": Decimal("5500.00"),
                 "transaction_metadata": {"transfer_type": "internal"},
-                "processed_at": datetime.now()
+                "processed_at": datetime.now(),
             },
             {
                 "from_account_id": accounts[0].id,
@@ -198,7 +200,7 @@ class TestDataSeeder:
                 "status": TransactionStatus.COMPLETED,
                 "balance_after": Decimal("5300.00"),
                 "transaction_metadata": {"atm_location": "downtown"},
-                "processed_at": datetime.now()
+                "processed_at": datetime.now(),
             },
             {
                 "from_account_id": accounts[2].id,
@@ -211,79 +213,79 @@ class TestDataSeeder:
                 "status": TransactionStatus.PENDING,
                 "balance_after": Decimal("2475.00"),
                 "transaction_metadata": {"fee_type": "maintenance"},
-                "processed_at": None
-            }
+                "processed_at": None,
+            },
         ]
-        
+
         transactions = []
         for transaction_data in transactions_data:
             transaction_schema = TransactionCreate(**transaction_data)
             transaction = await transaction_crud.create(db, obj_in=transaction_schema)
             transactions.append(transaction)
             self.created_transactions.append(transaction)
-        
+
         return transactions
-    
+
     async def create_test_otps(self, db) -> List[Otp]:
         """Create test OTPs"""
         otp_crud = BaseCRUD(Otp)
-        
+
         otps_data = [
             {
                 "email": "john.doe@example.com",
                 "otp_code": "123456",
                 "expires_on": datetime.now() + timedelta(minutes=10),
-                "is_expired": False
+                "is_expired": False,
             },
             {
                 "email": "jane.smith@example.com",
                 "otp_code": "654321",
                 "expires_on": datetime.now() - timedelta(minutes=5),
-                "is_expired": True
-            }
+                "is_expired": True,
+            },
         ]
-        
+
         otps = []
         for otp_data in otps_data:
             otp_schema = OtpCreate(**otp_data)
             otp = await otp_crud.create(db, obj_in=otp_schema)
             otps.append(otp)
             self.created_otps.append(otp)
-        
+
         return otps
-    
+
     async def cleanup_all_data(self, db):
         """Clean up all test data"""
         print("🧹 Cleaning up test data...")
-        
+
         # Delete in reverse order to respect foreign key constraints
         for transaction in self.created_transactions:
             await db.delete(transaction)
-        
+
         for account in self.created_accounts:
             await db.delete(account)
-        
+
         for otp in self.created_otps:
             await db.delete(otp)
-        
+
         for user in self.created_users:
             await db.delete(user)
-        
+
         await db.commit()
         print("✅ All test data cleaned up")
 
 
 class BaseCRUDTester:
     """Main test class for BaseCRUD methods"""
-    
+
     def __init__(self):
         self.seeder = TestDataSeeder()
         self.test_results = []
-    
+
     async def run_all_tests(self):
         """Run all BaseCRUD tests"""
         print("🚀 Starting BaseCRUD comprehensive tests...")
-        
+
         async for db in get_async_session():
             try:
                 # Create test data
@@ -292,188 +294,185 @@ class BaseCRUDTester:
                 accounts = await self.seeder.create_test_accounts(db, users)
                 transactions = await self.seeder.create_test_transactions(db, accounts)
                 otps = await self.seeder.create_test_otps(db)
-                
-                print(f"✅ Created {len(users)} users, {len(accounts)} accounts, {len(transactions)} transactions, {len(otps)} OTPs")
-                
+
+                print(
+                    f"✅ Created {len(users)} users, {len(accounts)} accounts, {len(transactions)} transactions, {len(otps)} OTPs"
+                )
+
                 # Run all test methods
-                await self.test_basic_crud_operations(db, users, accounts, transactions, otps)
-                await self.test_filtering_and_pagination(db, users, accounts, transactions)
+                await self.test_basic_crud_operations(
+                    db, users, accounts, transactions, otps
+                )
+                await self.test_filtering_and_pagination(
+                    db, users, accounts, transactions
+                )
                 await self.test_relationships(db, users, accounts, transactions)
                 await self.test_aggregations(db, accounts, transactions)
                 await self.test_advanced_operations(db, users, accounts, transactions)
-                
+
                 # Cleanup
                 await self.seeder.cleanup_all_data(db)
-                
+
             except Exception as e:
                 print(f"❌ Test failed with error: {e}")
                 await db.rollback()
                 raise
             finally:
                 await db.close()
-        
+
         self.print_test_summary()
-    
+
     async def test_basic_crud_operations(self, db, users, accounts, transactions, otps):
         """Test basic CRUD operations"""
         print("\n🔧 Testing Basic CRUD Operations...")
-        
+
         # Test User CRUD
         user_crud = BaseCRUD(User)
-        
+
         # Test get()
         user = await user_crud.get(db, users[0].id)
         assert user is not None, "get() should return user"
         print("✅ get() - User retrieved successfully")
-        
+
         # Test get_by()
-        user_by_email = await user_crud.get_by(db, filters={"email": "john.doe@example.com"})
+        user_by_email = await user_crud.get_by(
+            db, filters={"email": "john.doe@example.com"}
+        )
         assert user_by_email is not None, "get_by() should return user by email"
         print("✅ get_by() - User retrieved by email")
-        
+
         # Test get_or_404()
         user_404 = await user_crud.get_or_404(db, users[0].id)
         assert user_404 is not None, "get_or_404() should return user"
         print("✅ get_or_404() - User retrieved successfully")
-        
+
         # Test exists()
         exists = await user_crud.exists(db, email="john.doe@example.com")
         assert exists is True, "exists() should return True"
         print("✅ exists() - User exists check")
-        
+
         # Test count()
         count = await user_crud.count(db)
         assert count >= 3, "count() should return correct count"
         print("✅ count() - User count retrieved")
-        
+
         # Test update()
         update_data = {"first_name": "Johnny"}
         updated_user = await user_crud.update(db, db_obj=users[0], obj_in=update_data)
         assert updated_user.first_name == "Johnny", "update() should update user"
         print("✅ update() - User updated successfully")
-        
+
         # Test Account CRUD
         account_crud = BaseCRUD(Account)
-        
+
         # Test filter()
         active_accounts = await account_crud.filter(
-            db, 
-            filters={"status": AccountStatus.ACTIVE},
-            limit=5
+            db, filters={"status": AccountStatus.ACTIVE}, limit=5
         )
-        assert len(active_accounts["data"]) >= 3, "filter() should return active accounts"
+        assert (
+            len(active_accounts["data"]) >= 3
+        ), "filter() should return active accounts"
         print("✅ filter() - Active accounts filtered")
-        
+
         # Test all()
         all_accounts = await account_crud.all(db, limit=10)
         assert len(all_accounts["data"]) >= 4, "all() should return all accounts"
         print("✅ all() - All accounts retrieved")
-    
+
     async def test_filtering_and_pagination(self, db, users, accounts, transactions):
         """Test filtering and pagination features"""
         print("\n🔍 Testing Filtering and Pagination...")
-        
+
         user_crud = BaseCRUD(User)
         account_crud = BaseCRUD(Account)
         transaction_crud = BaseCRUD(Transaction)
-        
+
         # Test pagination
         paginated_users = await user_crud.filter(
-            db, 
-            limit=2, 
-            skip=0,
-            order_by=["first_name"]
+            db, limit=2, skip=0, order_by=["first_name"]
         )
         assert len(paginated_users["data"]) <= 2, "Pagination limit should work"
         print("✅ Pagination - Users paginated correctly")
-        
+
         # Test ordering
         ordered_accounts = await account_crud.filter(
-            db,
-            order_by=["-balance"]  # Descending order
+            db, order_by=["-balance"]  # Descending order
         )
         assert len(ordered_accounts["data"]) > 0, "Ordering should work"
         print("✅ Ordering - Accounts ordered by balance")
-        
+
         # Test complex filters
-        customer_users = await user_crud.filter(
-            db,
-            filters={"role": UserRole.CUSTOMER}
-        )
+        customer_users = await user_crud.filter(db, filters={"role": UserRole.CUSTOMER})
         assert len(customer_users["data"]) >= 2, "Role filter should work"
         print("✅ Complex Filters - Customer users filtered")
-        
+
         # Test field selection
         user_fields = await user_crud.filter(
-            db,
-            fields=[User.email, User.first_name],
-            limit=5
+            db, fields=[User.email, User.first_name], limit=5
         )
         assert len(user_fields["data"]) > 0, "Field selection should work"
         print("✅ Field Selection - Specific fields retrieved")
-    
+
     async def test_relationships(self, db, users, accounts, transactions):
         """Test relationship handling"""
         print("\n🔗 Testing Relationships...")
-        
+
         user_crud = BaseCRUD(User)
         account_crud = BaseCRUD(Account)
         transaction_crud = BaseCRUD(Transaction)
-        
+
         # Test joins
-        user_with_accounts = await user_crud.get(
-            db, 
-            users[0].id, 
-            joins=[User.accounts]
-        )
-        assert hasattr(user_with_accounts, 'accounts'), "Joins should load relationships"
+        user_with_accounts = await user_crud.get(db, users[0].id, joins=[User.accounts])
+        assert hasattr(
+            user_with_accounts, "accounts"
+        ), "Joins should load relationships"
         print("✅ Joins - User with accounts loaded")
-        
+
         # Test get_related()
         user_accounts = await user_crud.get_related(db, users[0].id, "accounts")
         assert len(user_accounts) >= 2, "get_related() should return related accounts"
         print("✅ get_related() - User accounts retrieved")
-        
+
         # Test add_to_relationship (simulate adding account to user)
         # Note: This is a conceptual test since accounts are already related
         print("✅ add_to_relationship() - Relationship handling works")
-        
+
         # Test transaction relationships
         account_transactions = await account_crud.get_related(
             db, accounts[0].id, "from_transactions"
         )
         assert len(account_transactions) >= 1, "Transaction relationships should work"
         print("✅ Transaction Relationships - Account transactions retrieved")
-    
+
     async def test_aggregations(self, db, accounts, transactions):
         """Test aggregation methods"""
         print("\n📊 Testing Aggregations...")
-        
+
         account_crud = BaseCRUD(Account)
         transaction_crud = BaseCRUD(Transaction)
-        
+
         # Test sum aggregation
         total_balance = await account_crud.aggregate(db, "balance", "sum")
         assert total_balance > 0, "Sum aggregation should work"
         print("✅ Sum Aggregation - Total balance calculated")
-        
+
         # Test max aggregation
         max_balance = await account_crud.aggregate(db, "balance", "max")
         assert max_balance > 0, "Max aggregation should work"
         print("✅ Max Aggregation - Maximum balance found")
-        
+
         # Test avg aggregation
         avg_balance = await account_crud.aggregate(db, "balance", "avg")
         assert avg_balance > 0, "Average aggregation should work"
         print("✅ Average Aggregation - Average balance calculated")
-    
+
     async def test_advanced_operations(self, db, users, accounts, transactions):
         """Test advanced operations"""
         print("\n⚡ Testing Advanced Operations...")
-        
+
         user_crud = BaseCRUD(User)
         account_crud = BaseCRUD(Account)
-        
+
         # Test create_many()
         new_users_data = [
             UserCreate(
@@ -482,7 +481,7 @@ class BaseCRUDTester:
                 last_name="User",
                 phone_number="+1111111111",
                 hashed_password=get_password_hash("password123"),
-                is_active=True
+                is_active=True,
             ),
             UserCreate(
                 email="test2@example.com",
@@ -490,40 +489,40 @@ class BaseCRUDTester:
                 last_name="User",
                 phone_number="+2222222222",
                 hashed_password=get_password_hash("password123"),
-                is_active=True
-            )
+                is_active=True,
+            ),
         ]
-        
+
         new_users = await user_crud.create_many(db, objs_in=new_users_data)
         assert len(new_users) == 2, "create_many() should create multiple users"
         print("✅ create_many() - Multiple users created")
-        
+
         # Test update_many()
         for user in new_users:
             user.first_name = f"Updated_{user.first_name}"
         await user_crud.update_many(db, new_users)
         print("✅ update_many() - Multiple users updated")
-        
+
         # Test delete_many()
         user_ids = [user.id for user in new_users]
         await user_crud.delete_many(db, user_ids)
         print("✅ delete_many() - Multiple users deleted")
-        
+
         # Test nested filters (conceptual)
         print("✅ Nested Filters - Filter condition building works")
-    
+
     def print_test_summary(self):
         """Print test summary"""
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("🎉 BaseCRUD Test Summary")
-        print("="*50)
+        print("=" * 50)
         print("✅ All basic CRUD operations tested")
         print("✅ Filtering and pagination tested")
         print("✅ Relationship handling tested")
         print("✅ Aggregation methods tested")
         print("✅ Advanced operations tested")
         print("✅ Data cleanup completed")
-        print("="*50)
+        print("=" * 50)
         print("🎯 All tests completed successfully!")
 
 
@@ -534,4 +533,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())

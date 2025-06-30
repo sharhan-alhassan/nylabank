@@ -13,9 +13,12 @@ class AccountBase(BaseSchema):
     currency: str = Field(default="USD", description="Account currency")
     status: AccountStatus = Field(default=AccountStatus.ACTIVE)
     overdraft_limit: Decimal = Field(default=0.00, description="Overdraft limit")
-    interest_rate: Optional[Decimal] = Field(None, description="Interest rate for savings accounts (as decimal, e.g., 0.05 for 5%)")
-    
-    @validator('interest_rate')
+    interest_rate: Optional[Decimal] = Field(
+        None,
+        description="Interest rate for savings accounts (as decimal, e.g., 0.05 for 5%)",
+    )
+
+    @validator("interest_rate")
     def validate_interest_rate(cls, v):
         if v is not None:
             # Convert percentage to decimal if it's a whole number > 1
@@ -23,12 +26,13 @@ class AccountBase(BaseSchema):
                 v = v / 100
             # Ensure it fits within the database constraint (precision=5, scale=4)
             if v >= 10:  # Max value for precision=5, scale=4 is 9.9999
-                raise ValueError('Interest rate must be less than 1000%')
+                raise ValueError("Interest rate must be less than 1000%")
         return v
 
 
 class AccountCreate(AccountBase):
     user_id: UUID = Field(..., description="User ID who owns this account")
+
 
 class AccountUpdate(BaseSchema):
     account_number: Optional[str] = None
@@ -37,9 +41,12 @@ class AccountUpdate(BaseSchema):
     currency: Optional[str] = None
     status: Optional[AccountStatus] = None
     overdraft_limit: Optional[Decimal] = None
-    interest_rate: Optional[Decimal] = Field(None, description="Interest rate for savings accounts (as decimal, e.g., 0.05 for 5%)")
-    
-    @validator('interest_rate')
+    interest_rate: Optional[Decimal] = Field(
+        None,
+        description="Interest rate for savings accounts (as decimal, e.g., 0.05 for 5%)",
+    )
+
+    @validator("interest_rate")
     def validate_interest_rate(cls, v):
         if v is not None:
             # Convert percentage to decimal if it's a whole number > 1
@@ -47,7 +54,7 @@ class AccountUpdate(BaseSchema):
                 v = v / 100
             # Ensure it fits within the database constraint (precision=5, scale=4)
             if v >= 10:  # Max value for precision=5, scale=4 is 9.9999
-                raise ValueError('Interest rate must be less than 1000%')
+                raise ValueError("Interest rate must be less than 1000%")
         return v
 
 
@@ -101,8 +108,8 @@ class AccountCreateResponse(BaseSchema):
 class AccountUpdateResponse(BaseSchema):
     detail: str
     account: Account
-    
+
+
 class AccountCloseResponse(BaseSchema):
     detail: str
-    account_id: UUID 
-    
+    account_id: UUID

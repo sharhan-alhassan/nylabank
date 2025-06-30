@@ -33,15 +33,15 @@ import string
 def generate_reference_number(transaction_type: str) -> str:
     """Generate a unique reference number for transactions"""
     # Generate 12 random alphanumeric characters
-    random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
+    random_chars = "".join(random.choices(string.ascii_uppercase + string.digits, k=12))
     # Prefix based on transaction type
     prefix = {
         "deposit": "DEP",
-        "withdrawal": "WTH", 
+        "withdrawal": "WTH",
         "transfer": "TRF",
-        "reversal": "REV"
+        "reversal": "REV",
     }.get(transaction_type.lower(), "TXN")
-    
+
     return f"{prefix}{random_chars}"
 
 
@@ -117,17 +117,20 @@ class TransactionRouter:
             account = await account_crud.get_or_404(db, deposit_in.account_id)
 
             # Check if user has access to this account
-            if current_user.role == UserRole.CUSTOMER and account.user_id != current_user.id:
+            if (
+                current_user.role == UserRole.CUSTOMER
+                and account.user_id != current_user.id
+            ):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Access denied to this account"
+                    detail="Access denied to this account",
                 )
 
             # Check if account is active
             if account.status != AccountStatus.ACTIVE:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Account is not active"
+                    detail="Account is not active",
                 )
 
             # Generate reference number
@@ -147,16 +150,14 @@ class TransactionRouter:
                 reference_number=reference_number,
                 status=TransactionStatus.COMPLETED,
                 balance_after=new_balance,  # Track balance after transaction
-                processed_at=datetime.now()
+                processed_at=datetime.now(),
             )
 
             transaction = await transaction_crud.create(db, obj_in=transaction_data)
 
             # Update account balance
             await account_crud.update(
-                db,
-                db_obj=account,
-                obj_in={"balance": new_balance}
+                db, db_obj=account, obj_in={"balance": new_balance}
             )
 
             # Send transaction notification
@@ -165,18 +166,22 @@ class TransactionRouter:
                     # Get user for email
                     user = await user_crud.get(db, account.user_id)
                     if user and user.email:
-                        await send_transaction_notification({
-                            "email_to": user.email,
-                            "transaction_type": "DEPOSIT",
-                            "reference_number": reference_number,
-                            "amount": str(deposit_in.amount),
-                            "currency": account.currency,
-                            "account_number": account.account_number,
-                            "balance_after": str(new_balance),
-                            "transaction_date": datetime.now().strftime("%B %d, %Y at %I:%M %p"),
-                            "description": deposit_in.description or "Deposit",
-                            "name": user.first_name.title(),
-                        })
+                        await send_transaction_notification(
+                            {
+                                "email_to": user.email,
+                                "transaction_type": "DEPOSIT",
+                                "reference_number": reference_number,
+                                "amount": str(deposit_in.amount),
+                                "currency": account.currency,
+                                "account_number": account.account_number,
+                                "balance_after": str(new_balance),
+                                "transaction_date": datetime.now().strftime(
+                                    "%B %d, %Y at %I:%M %p"
+                                ),
+                                "description": deposit_in.description or "Deposit",
+                                "name": user.first_name.title(),
+                            }
+                        )
                         logger.info(f"Transaction notification sent to {user.email}")
                 except Exception as e:
                     logger.error(f"Failed to send transaction notification: {str(e)}")
@@ -185,14 +190,14 @@ class TransactionRouter:
 
             return {
                 "detail": f"Deposit of {deposit_in.amount} {account.currency} completed successfully",
-                "transaction": transaction
+                "transaction": transaction,
             }
         except HTTPException:
             raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error processing deposit: {str(e)}"
+                detail=f"Error processing deposit: {str(e)}",
             )
 
     async def withdraw(
@@ -208,24 +213,27 @@ class TransactionRouter:
             account = await account_crud.get_or_404(db, withdraw_in.account_id)
 
             # Check if user has access to this account
-            if current_user.role == UserRole.CUSTOMER and account.user_id != current_user.id:
+            if (
+                current_user.role == UserRole.CUSTOMER
+                and account.user_id != current_user.id
+            ):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Access denied to this account"
+                    detail="Access denied to this account",
                 )
 
             # Check if account is active
             if account.status != AccountStatus.ACTIVE:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Account is not active"
+                    detail="Account is not active",
                 )
 
             # Check if sufficient balance
             if account.balance < withdraw_in.amount:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Insufficient balance"
+                    detail="Insufficient balance",
                 )
 
             # Generate reference number
@@ -245,16 +253,14 @@ class TransactionRouter:
                 reference_number=reference_number,
                 status=TransactionStatus.COMPLETED,
                 balance_after=new_balance,  # Track balance after transaction
-                processed_at=datetime.now()
+                processed_at=datetime.now(),
             )
 
             transaction = await transaction_crud.create(db, obj_in=transaction_data)
 
             # Update account balance
             await account_crud.update(
-                db,
-                db_obj=account,
-                obj_in={"balance": new_balance}
+                db, db_obj=account, obj_in={"balance": new_balance}
             )
 
             # Send transaction notification
@@ -263,18 +269,22 @@ class TransactionRouter:
                     # Get user for email
                     user = await user_crud.get(db, account.user_id)
                     if user and user.email:
-                        await send_transaction_notification({
-                            "email_to": user.email,
-                            "transaction_type": "WITHDRAWAL",
-                            "reference_number": reference_number,
-                            "amount": str(withdraw_in.amount),
-                            "currency": account.currency,
-                            "account_number": account.account_number,
-                            "balance_after": str(new_balance),
-                            "transaction_date": datetime.now().strftime("%B %d, %Y at %I:%M %p"),
-                            "description": withdraw_in.description or "Withdrawal",
-                            "name": user.first_name.title(),
-                        })
+                        await send_transaction_notification(
+                            {
+                                "email_to": user.email,
+                                "transaction_type": "WITHDRAWAL",
+                                "reference_number": reference_number,
+                                "amount": str(withdraw_in.amount),
+                                "currency": account.currency,
+                                "account_number": account.account_number,
+                                "balance_after": str(new_balance),
+                                "transaction_date": datetime.now().strftime(
+                                    "%B %d, %Y at %I:%M %p"
+                                ),
+                                "description": withdraw_in.description or "Withdrawal",
+                                "name": user.first_name.title(),
+                            }
+                        )
                         logger.info(f"Transaction notification sent to {user.email}")
                 except Exception as e:
                     logger.error(f"Failed to send transaction notification: {str(e)}")
@@ -283,14 +293,14 @@ class TransactionRouter:
 
             return {
                 "detail": f"Withdrawal of {withdraw_in.amount} {account.currency} completed successfully",
-                "transaction": transaction
+                "transaction": transaction,
             }
         except HTTPException:
             raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error processing withdrawal: {str(e)}"
+                detail=f"Error processing withdrawal: {str(e)}",
             )
 
     async def transfer(
@@ -303,35 +313,43 @@ class TransactionRouter:
         """Transfer money between accounts"""
         try:
             # Get the accounts
-            from_account = await account_crud.get_or_404(db, transfer_in.from_account_id)
+            from_account = await account_crud.get_or_404(
+                db, transfer_in.from_account_id
+            )
             to_account = await account_crud.get_or_404(db, transfer_in.to_account_id)
 
             # Check if user has access to the from_account
-            if current_user.role == UserRole.CUSTOMER and from_account.user_id != current_user.id:
+            if (
+                current_user.role == UserRole.CUSTOMER
+                and from_account.user_id != current_user.id
+            ):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Access denied to source account"
+                    detail="Access denied to source account",
                 )
 
             # Check if accounts are active
-            if from_account.status != AccountStatus.ACTIVE or to_account.status != AccountStatus.ACTIVE:
+            if (
+                from_account.status != AccountStatus.ACTIVE
+                or to_account.status != AccountStatus.ACTIVE
+            ):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="One or both accounts are not active"
+                    detail="One or both accounts are not active",
                 )
 
             # Check if sufficient balance in source account
             if from_account.balance < transfer_in.amount:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Insufficient balance in source account"
+                    detail="Insufficient balance in source account",
                 )
 
             # Check if accounts have same currency
             if from_account.currency != to_account.currency:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Cannot transfer between accounts with different currencies"
+                    detail="Cannot transfer between accounts with different currencies",
                 )
 
             # Generate reference number
@@ -352,21 +370,17 @@ class TransactionRouter:
                 reference_number=reference_number,
                 status=TransactionStatus.COMPLETED,
                 balance_after=from_new_balance,  # Track balance after transaction for source account
-                processed_at=datetime.now()
+                processed_at=datetime.now(),
             )
 
             transaction = await transaction_crud.create(db, obj_in=transaction_data)
 
             # Update account balances
             await account_crud.update(
-                db,
-                db_obj=from_account,
-                obj_in={"balance": from_new_balance}
+                db, db_obj=from_account, obj_in={"balance": from_new_balance}
             )
             await account_crud.update(
-                db,
-                db_obj=to_account,
-                obj_in={"balance": to_new_balance}
+                db, db_obj=to_account, obj_in={"balance": to_new_balance}
             )
 
             # Send transaction notifications
@@ -375,42 +389,54 @@ class TransactionRouter:
                     # Get users for email notifications
                     from_user = await user_crud.get(db, from_account.user_id)
                     to_user = await user_crud.get(db, to_account.user_id)
-                    
+
                     # Send notification to sender
                     if from_user and from_user.email:
-                        await send_transaction_notification({
-                            "email_to": from_user.email,
-                            "transaction_type": "TRANSFER",
-                            "reference_number": reference_number,
-                            "amount": str(transfer_in.amount),
-                            "currency": from_account.currency,
-                            "account_number": from_account.account_number,
-                            "balance_after": str(from_new_balance),
-                            "transaction_date": datetime.now().strftime("%B %d, %Y at %I:%M %p"),
-                            "description": transfer_in.description or "Transfer",
-                            "from_account_last4": from_account.account_number[-4:],
-                            "to_account_last4": to_account.account_number[-4:],
-                            "name": from_user.first_name.title(),
-                        })
-                        logger.info(f"Transfer notification sent to sender {from_user.email}")
-                    
+                        await send_transaction_notification(
+                            {
+                                "email_to": from_user.email,
+                                "transaction_type": "TRANSFER",
+                                "reference_number": reference_number,
+                                "amount": str(transfer_in.amount),
+                                "currency": from_account.currency,
+                                "account_number": from_account.account_number,
+                                "balance_after": str(from_new_balance),
+                                "transaction_date": datetime.now().strftime(
+                                    "%B %d, %Y at %I:%M %p"
+                                ),
+                                "description": transfer_in.description or "Transfer",
+                                "from_account_last4": from_account.account_number[-4:],
+                                "to_account_last4": to_account.account_number[-4:],
+                                "name": from_user.first_name.title(),
+                            }
+                        )
+                        logger.info(
+                            f"Transfer notification sent to sender {from_user.email}"
+                        )
+
                     # Send notification to recipient (if different user)
                     if to_user and to_user.email and to_user.id != from_user.id:
-                        await send_transaction_notification({
-                            "email_to": to_user.email,
-                            "transaction_type": "TRANSFER",
-                            "reference_number": reference_number,
-                            "amount": str(transfer_in.amount),
-                            "currency": to_account.currency,
-                            "account_number": to_account.account_number,
-                            "balance_after": str(to_new_balance),
-                            "transaction_date": datetime.now().strftime("%B %d, %Y at %I:%M %p"),
-                            "description": f"Received transfer: {transfer_in.description or 'Transfer'}",
-                            "from_account_last4": from_account.account_number[-4:],
-                            "to_account_last4": to_account.account_number[-4:],
-                            "name": to_user.first_name.title(), 
-                        })
-                        logger.info(f"Transfer notification sent to recipient {to_user.email}")
+                        await send_transaction_notification(
+                            {
+                                "email_to": to_user.email,
+                                "transaction_type": "TRANSFER",
+                                "reference_number": reference_number,
+                                "amount": str(transfer_in.amount),
+                                "currency": to_account.currency,
+                                "account_number": to_account.account_number,
+                                "balance_after": str(to_new_balance),
+                                "transaction_date": datetime.now().strftime(
+                                    "%B %d, %Y at %I:%M %p"
+                                ),
+                                "description": f"Received transfer: {transfer_in.description or 'Transfer'}",
+                                "from_account_last4": from_account.account_number[-4:],
+                                "to_account_last4": to_account.account_number[-4:],
+                                "name": to_user.first_name.title(),
+                            }
+                        )
+                        logger.info(
+                            f"Transfer notification sent to recipient {to_user.email}"
+                        )
                 except Exception as e:
                     logger.error(f"Failed to send transfer notification: {str(e)}")
 
@@ -418,14 +444,14 @@ class TransactionRouter:
 
             return {
                 "detail": f"Transfer of {transfer_in.amount} {from_account.currency} completed successfully",
-                "transaction": transaction
+                "transaction": transaction,
             }
         except HTTPException:
             raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error processing transfer: {str(e)}"
+                detail=f"Error processing transfer: {str(e)}",
             )
 
     async def list_transactions(
@@ -443,47 +469,52 @@ class TransactionRouter:
                 page = 1
             if per_page < 1 or per_page > 50:
                 per_page = 10
-            
+
             skip = (page - 1) * per_page
-            
+
             if account_id:
                 # Check if user has access to this specific account
                 account = await account_crud.get_or_404(db, account_id)
-                if current_user.role == UserRole.CUSTOMER and account.user_id != current_user.id:
+                if (
+                    current_user.role == UserRole.CUSTOMER
+                    and account.user_id != current_user.id
+                ):
                     raise HTTPException(
                         status_code=status.HTTP_403_FORBIDDEN,
-                        detail="Access denied to this account"
+                        detail="Access denied to this account",
                     )
-                
+
                 # Get transactions for this specific account (both incoming and outgoing)
                 incoming_transactions = await transaction_crud.filter(
                     db,
                     filters={"to_account_id": account_id},
                     limit=per_page,
                     skip=skip,
-                    order_by=["-created_at"]
+                    order_by=["-created_at"],
                 )
-                
+
                 outgoing_transactions = await transaction_crud.filter(
                     db,
                     filters={"from_account_id": account_id},
                     limit=per_page,
                     skip=skip,
-                    order_by=["-created_at"]
+                    order_by=["-created_at"],
                 )
-                
+
                 # Combine and sort transactions
-                all_transactions = incoming_transactions["data"] + outgoing_transactions["data"]
+                all_transactions = (
+                    incoming_transactions["data"] + outgoing_transactions["data"]
+                )
                 # Sort by created_at (most recent first)
                 all_transactions.sort(key=lambda x: x.created_at, reverse=True)
-                
+
                 # Apply pagination manually since we combined results
                 start_idx = skip
                 end_idx = start_idx + per_page
                 paginated_transactions = all_transactions[start_idx:end_idx]
-                
+
                 total_count = len(all_transactions)
-                
+
             else:
                 # For customers, get transactions for all their accounts
                 if current_user.role == UserRole.CUSTOMER:
@@ -492,16 +523,16 @@ class TransactionRouter:
                         db, filters={"user_id": current_user.id}, limit=100
                     )
                     account_ids = [acc.id for acc in user_accounts["data"]]
-                    
+
                     if not account_ids:
                         return {
                             "total_count": 0,
                             "page": page,
                             "per_page": per_page,
                             "total_pages": 0,
-                            "data": []
+                            "data": [],
                         }
-                    
+
                     # Get transactions for all user accounts
                     all_transactions = []
                     for acc_id in account_ids:
@@ -510,29 +541,29 @@ class TransactionRouter:
                             db,
                             filters={"to_account_id": acc_id},
                             limit=1000,  # Get all transactions for this account
-                            skip=0
+                            skip=0,
                         )
                         all_transactions.extend(incoming["data"])
-                        
+
                         # Get outgoing transactions
                         outgoing = await transaction_crud.filter(
                             db,
                             filters={"from_account_id": acc_id},
                             limit=1000,  # Get all transactions for this account
-                            skip=0
+                            skip=0,
                         )
                         all_transactions.extend(outgoing["data"])
-                    
+
                     # Sort by created_at (most recent first)
                     all_transactions.sort(key=lambda x: x.created_at, reverse=True)
-                    
+
                     # Apply pagination
                     start_idx = skip
                     end_idx = start_idx + per_page
                     paginated_transactions = all_transactions[start_idx:end_idx]
-                    
+
                     total_count = len(all_transactions)
-                    
+
                 else:
                     # Admin can see all transactions
                     transactions = await transaction_crud.filter(
@@ -540,7 +571,7 @@ class TransactionRouter:
                         filters={},
                         limit=per_page,
                         skip=skip,
-                        order_by=["-created_at"]
+                        order_by=["-created_at"],
                     )
                     paginated_transactions = transactions["data"]
                     total_count = transactions["total_count"]
@@ -553,14 +584,14 @@ class TransactionRouter:
                 "page": page,
                 "per_page": per_page,
                 "total_pages": total_pages,
-                "data": paginated_transactions
+                "data": paginated_transactions,
             }
         except HTTPException:
             raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error retrieving transactions: {str(e)}"
+                detail=f"Error retrieving transactions: {str(e)}",
             )
 
     async def get_transaction(
@@ -577,10 +608,12 @@ class TransactionRouter:
             if current_user.role == UserRole.CUSTOMER:
                 # Check if user owns either the from or to account
                 if transaction.from_account_id:
-                    from_account = await account_crud.get(db, transaction.from_account_id)
+                    from_account = await account_crud.get(
+                        db, transaction.from_account_id
+                    )
                     if from_account and from_account.user_id == current_user.id:
                         return transaction
-                
+
                 if transaction.to_account_id:
                     to_account = await account_crud.get(db, transaction.to_account_id)
                     if to_account and to_account.user_id == current_user.id:
@@ -588,7 +621,7 @@ class TransactionRouter:
 
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Access denied to this transaction"
+                    detail="Access denied to this transaction",
                 )
 
             return transaction
@@ -597,7 +630,7 @@ class TransactionRouter:
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error retrieving transaction: {str(e)}"
+                detail=f"Error retrieving transaction: {str(e)}",
             )
 
     async def reverse_transaction(
@@ -613,7 +646,7 @@ class TransactionRouter:
             if current_user.role != UserRole.ADMIN:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Only admins can reverse transactions"
+                    detail="Only admins can reverse transactions",
                 )
 
             # Get the original transaction
@@ -623,7 +656,7 @@ class TransactionRouter:
             if original_transaction.status != TransactionStatus.COMPLETED:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Only completed transactions can be reversed"
+                    detail="Only completed transactions can be reversed",
                 )
 
             # Create reversal transaction
@@ -639,57 +672,59 @@ class TransactionRouter:
                 processed_at=datetime.now(),
                 transaction_metadata={
                     "reversed_transaction_id": str(original_transaction.id),
-                    "reason": reverse_in.reason
-                }
+                    "reason": reverse_in.reason,
+                },
             )
 
-            reversal_transaction = await transaction_crud.create(db, obj_in=reversal_data)
+            reversal_transaction = await transaction_crud.create(
+                db, obj_in=reversal_data
+            )
 
             # Update account balances
             if original_transaction.from_account_id:
-                from_account = await account_crud.get(db, original_transaction.from_account_id)
+                from_account = await account_crud.get(
+                    db, original_transaction.from_account_id
+                )
                 if from_account:
                     new_balance = from_account.balance + original_transaction.amount
                     # Update reversal transaction with balance_after for from_account
                     await transaction_crud.update(
                         db,
                         db_obj=reversal_transaction,
-                        obj_in={"balance_after": new_balance}
+                        obj_in={"balance_after": new_balance},
                     )
                     await account_crud.update(
-                        db,
-                        db_obj=from_account,
-                        obj_in={"balance": new_balance}
+                        db, db_obj=from_account, obj_in={"balance": new_balance}
                     )
 
             if original_transaction.to_account_id:
-                to_account = await account_crud.get(db, original_transaction.to_account_id)
+                to_account = await account_crud.get(
+                    db, original_transaction.to_account_id
+                )
                 if to_account:
                     new_balance = to_account.balance - original_transaction.amount
                     await account_crud.update(
-                        db,
-                        db_obj=to_account,
-                        obj_in={"balance": new_balance}
+                        db, db_obj=to_account, obj_in={"balance": new_balance}
                     )
 
             # Mark original transaction as reversed
             await transaction_crud.update(
                 db,
                 db_obj=original_transaction,
-                obj_in={"status": TransactionStatus.REVERSED}
+                obj_in={"status": TransactionStatus.REVERSED},
             )
 
             return {
                 "detail": f"Transaction {original_transaction.reference_number} reversed successfully",
                 "original_transaction": original_transaction,
-                "reversal_transaction": reversal_transaction
+                "reversal_transaction": reversal_transaction,
             }
         except HTTPException:
             raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error reversing transaction: {str(e)}"
+                detail=f"Error reversing transaction: {str(e)}",
             )
 
 

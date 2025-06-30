@@ -14,25 +14,31 @@ class TransactionBase(BaseSchema):
     description: Optional[str] = Field(None, description="Transaction description")
     reference_number: str = Field(..., description="Unique reference number")
     status: TransactionStatus = Field(default=TransactionStatus.PENDING)
-    balance_after: Optional[Decimal] = Field(None, description="Balance after transaction")
-    transaction_metadata: Optional[Dict[str, Any]] = Field(None, description="Additional transaction metadata")
-    processed_at: Optional[datetime] = Field(None, description="When transaction was processed")
+    balance_after: Optional[Decimal] = Field(
+        None, description="Balance after transaction"
+    )
+    transaction_metadata: Optional[Dict[str, Any]] = Field(
+        None, description="Additional transaction metadata"
+    )
+    processed_at: Optional[datetime] = Field(
+        None, description="When transaction was processed"
+    )
 
 
 class TransactionCreate(TransactionBase):
     from_account_id: Optional[UUID] = Field(None, description="Source account ID")
     to_account_id: Optional[UUID] = Field(None, description="Destination account ID")
-    
-    @validator('amount')
+
+    @validator("amount")
     def validate_amount(cls, v):
         if v <= 0:
-            raise ValueError('Amount must be greater than 0')
+            raise ValueError("Amount must be greater than 0")
         return v
-    
-    @validator('reference_number')
+
+    @validator("reference_number")
     def validate_reference_number(cls, v):
         if len(v) < 6:
-            raise ValueError('Reference number must be at least 6 characters long')
+            raise ValueError("Reference number must be at least 6 characters long")
         return v.upper()
 
 
@@ -118,4 +124,4 @@ class TransactionFilter(BaseSchema):
     min_amount: Optional[Decimal] = None
     max_amount: Optional[Decimal] = None
     limit: Optional[int] = Field(10, ge=1, le=100)
-    skip: Optional[int] = Field(0, ge=0) 
+    skip: Optional[int] = Field(0, ge=0)

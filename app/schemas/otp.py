@@ -28,9 +28,11 @@ class OtpInDBBase(OtpBase):
     created_at: datetime
     updated_at: datetime
 
+
 class OtpConfirm(BaseSchema):
     email: str = Field(..., description="Email address for OTP")
     otp_code: str = Field(..., description="OTP code")
+
 
 class Otp(OtpInDBBase):
     pass
@@ -38,4 +40,3 @@ class Otp(OtpInDBBase):
 
 class OtpInDB(OtpInDBBase):
     pass
-

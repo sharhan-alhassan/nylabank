@@ -88,6 +88,6 @@ class UUIDMixin:
         nullable=False,
     )
 
+
 # created_at: Mapped[DateTime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 # updated_at: Mapped[DateTime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-    

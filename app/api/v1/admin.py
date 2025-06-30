@@ -80,9 +80,9 @@ class AdminRouter:
                 page = 1
             if per_page < 1 or per_page > 50:
                 per_page = 10
-            
+
             skip = (page - 1) * per_page
-            
+
             # Build filters
             filters = {}
             if role:
@@ -92,11 +92,7 @@ class AdminRouter:
 
             # Get users with filters
             users = await user_crud.filter(
-                db,
-                filters=filters,
-                limit=per_page,
-                skip=skip,
-                order_by=["-created_at"]
+                db, filters=filters, limit=per_page, skip=skip, order_by=["-created_at"]
             )
 
             # Calculate pagination info
@@ -108,12 +104,12 @@ class AdminRouter:
                 "page": page,
                 "per_page": per_page,
                 "total_pages": total_pages,
-                "data": users["data"]
+                "data": users["data"],
             }
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error retrieving users: {str(e)}"
+                detail=f"Error retrieving users: {str(e)}",
             )
 
     async def list_all_accounts(
@@ -132,9 +128,9 @@ class AdminRouter:
                 page = 1
             if per_page < 1 or per_page > 50:
                 per_page = 10
-            
+
             skip = (page - 1) * per_page
-            
+
             # Build filters
             filters = {}
             if status:
@@ -144,11 +140,7 @@ class AdminRouter:
 
             # Get accounts with filters
             accounts = await account_crud.filter(
-                db,
-                filters=filters,
-                limit=per_page,
-                skip=skip,
-                order_by=["-created_at"]
+                db, filters=filters, limit=per_page, skip=skip, order_by=["-created_at"]
             )
 
             # Calculate pagination info
@@ -160,12 +152,12 @@ class AdminRouter:
                 "page": page,
                 "per_page": per_page,
                 "total_pages": total_pages,
-                "data": accounts["data"]
+                "data": accounts["data"],
             }
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error retrieving accounts: {str(e)}"
+                detail=f"Error retrieving accounts: {str(e)}",
             )
 
     async def list_all_transactions(
@@ -186,9 +178,9 @@ class AdminRouter:
                 page = 1
             if per_page < 1 or per_page > 50:
                 per_page = 10
-            
+
             skip = (page - 1) * per_page
-            
+
             # Build filters
             filters = {}
             if transaction_type:
@@ -199,14 +191,10 @@ class AdminRouter:
                 filters["created_at__gte"] = start_date
             if end_date:
                 filters["created_at__lte"] = end_date
-                
+
             # Get transactions with filters
             transactions = await transaction_crud.filter(
-                db,
-                filters=filters,
-                limit=per_page,
-                skip=skip,
-                order_by=["-created_at"]
+                db, filters=filters, limit=per_page, skip=skip, order_by=["-created_at"]
             )
 
             # Calculate pagination info
@@ -218,12 +206,12 @@ class AdminRouter:
                 "page": page,
                 "per_page": per_page,
                 "total_pages": total_pages,
-                "data": transactions["data"]
+                "data": transactions["data"],
             }
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error retrieving transactions: {str(e)}"
+                detail=f"Error retrieving transactions: {str(e)}",
             )
 
     async def freeze_account(
@@ -241,25 +229,23 @@ class AdminRouter:
             if account.status == AccountStatus.FROZEN:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Account is already frozen"
+                    detail="Account is already frozen",
                 )
 
             # Freeze the account
             frozen_account = await account_crud.update(
-                db,
-                db_obj=account,
-                obj_in={"status": AccountStatus.FROZEN}
+                db, db_obj=account, obj_in={"status": AccountStatus.FROZEN}
             )
 
             return {
                 "detail": f"Account {frozen_account.account_number} frozen successfully",
                 "account_id": frozen_account.id,
-                "status": frozen_account.status
+                "status": frozen_account.status,
             }
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error freezing account: {str(e)}"
+                detail=f"Error freezing account: {str(e)}",
             )
 
     async def daily_summary(
@@ -277,7 +263,7 @@ class AdminRouter:
                 except ValueError:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Invalid date format. Use YYYY-MM-DD"
+                        detail="Invalid date format. Use YYYY-MM-DD",
                     )
             else:
                 report_date = datetime.now().date()
@@ -293,33 +279,32 @@ class AdminRouter:
                 db,
                 filters={
                     "created_at__gte": start_datetime,
-                    "created_at__lte": end_datetime
-                }
+                    "created_at__lte": end_datetime,
+                },
             )
 
             # Total accounts
             total_accounts = await account_crud.count(db)
             active_accounts = await account_crud.count(
-                db,
-                filters={"status": AccountStatus.ACTIVE}
+                db, filters={"status": AccountStatus.ACTIVE}
             )
 
             # Total transactions
             total_transactions = await transaction_crud.count(db)
-            
+
             # Transactions today
             today_transactions = await transaction_crud.count(
                 db,
                 filters={
                     "created_at__gte": start_datetime,
-                    "created_at__lte": end_datetime
-                }
+                    "created_at__lte": end_datetime,
+                },
             )
 
             # Calculate total transaction volume today
             from app.models.transaction import Transaction
             from sqlalchemy import func
-            
+
             # This is a simplified calculation - you might want to use proper aggregation
             total_volume_today = Decimal("0.00")  # Placeholder
 
@@ -329,55 +314,49 @@ class AdminRouter:
                 filters={
                     "transaction_type": TransactionType.DEPOSIT,
                     "created_at__gte": start_datetime,
-                    "created_at__lte": end_datetime
-                }
+                    "created_at__lte": end_datetime,
+                },
             )
-            
+
             withdrawal_count = await transaction_crud.count(
                 db,
                 filters={
                     "transaction_type": TransactionType.WITHDRAWAL,
                     "created_at__gte": start_datetime,
-                    "created_at__lte": end_datetime
-                }
+                    "created_at__lte": end_datetime,
+                },
             )
-            
+
             transfer_count = await transaction_crud.count(
                 db,
                 filters={
                     "transaction_type": TransactionType.TRANSFER,
                     "created_at__gte": start_datetime,
-                    "created_at__lte": end_datetime
-                }
+                    "created_at__lte": end_datetime,
+                },
             )
 
             return {
                 "date": report_date.isoformat(),
                 "summary": {
-                    "users": {
-                        "total": total_users,
-                        "new_today": new_users_today
-                    },
-                    "accounts": {
-                        "total": total_accounts,
-                        "active": active_accounts
-                    },
+                    "users": {"total": total_users, "new_today": new_users_today},
+                    "accounts": {"total": total_accounts, "active": active_accounts},
                     "transactions": {
                         "total": total_transactions,
                         "today": today_transactions,
-                        "volume_today": total_volume_today
+                        "volume_today": total_volume_today,
                     },
                     "transaction_types": {
                         "deposits": deposit_count,
                         "withdrawals": withdrawal_count,
-                        "transfers": transfer_count
-                    }
-                }
+                        "transfers": transfer_count,
+                    },
+                },
             }
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error generating daily summary: {str(e)}"
+                detail=f"Error generating daily summary: {str(e)}",
             )
 
 

@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     MAIL_PORT: int = int(os.getenv("MAIL_PORT", 587))
     MAIL_SERVER: str = os.getenv("MAIL_SERVER", "smtp.gmail.com")
     MAIL_FROM_NAME: str = os.getenv("MAIL_FROM_NAME")
-    
+
     MAIL_STARTTLS: bool = (os.getenv("MAIL_STARTTLS"),)
     MAIL_SSL_TLS: bool = (os.getenv("MAIL_SSL_TLS"),)
     USE_CREDENTIALS: bool = (os.getenv("USE_CREDENTIALS"),)
@@ -74,5 +74,6 @@ class Settings(BaseSettings):
 @lru_cache()
 def get_settings():
     return Settings()
+
 
 settings = get_settings()

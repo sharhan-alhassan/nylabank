@@ -12,13 +12,54 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 
 description = """
-NyLabank API helps you create and manage fundraising projects. 🚀 
+NylaBank API is a modern, secure digital banking platform for managing users, accounts, and transactions.
 
-## Features
+### Key Features
 
-* **Users** - Create and manage user accounts
-* **Projects** - Create and manage fundraising projects
-* **Contributions** - Make a contribution to projects
+- **User Management**
+  - Register, verify, and authenticate users
+  - Role-based access (Customer, Admin)
+  - Profile management and password reset via email OTP
+
+- **Account Management**
+  - Create, view, and delete bank accounts (Checking, Savings, etc.)
+  - Automated account number generation
+  - Real-time balance tracking and account statements
+
+- **Transactions**
+  - Deposit, withdraw, and transfer funds between accounts
+  - Transaction history with pagination and filtering
+  - Automatic reference number generation for each transaction
+  - Email notifications for all major account activities
+
+- **Admin & Analytics**
+  - Admin endpoints for user and account oversight
+  - Daily summaries and advanced reporting
+  - Secure access to sensitive operations
+
+- **Security & Compliance**
+  - JWT-based authentication
+  - CORS and environment-based configuration
+  - Email verification and OTP for sensitive actions
+
+- **Developer Experience**
+  - Fully async FastAPI backend
+  - Modular, versioned API structure (`/api/v1/`)
+  - Interactive API docs (Swagger, Redoc, Scalar)
+  - Comprehensive test suite and CI/CD integration
+
+---
+
+**Typical Workflow:**
+1. User registers and verifies email via OTP.
+2. User creates one or more bank accounts.
+3. User performs deposits, withdrawals, and transfers.
+4. All actions are logged, and notifications are sent via email.
+5. Admins can monitor, audit, and manage all users and accounts.
+
+---
+
+For more details, see the documentation below or contact support.
 """
 
 
@@ -65,6 +106,7 @@ async def scalar_html():
         servers=[
             {"url": "https://nylabankapi.prod.maoney.co"},
             {"url": "http://localhost:8000"},
+            {"url": "http://127.0.0.1:8000"},
         ],
         default_open_all_tags=True,
         scalar_theme="",  # "alternate, default, moon, purple, solarized, bluePlanet, saturn, kepler, mars, deepSpace, none"

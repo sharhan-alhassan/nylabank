@@ -2,16 +2,83 @@ name: nylabank-service
 
 on:
   push:
-    branches: [ staging, main ]
+    branches: [main]
 
 # Add permissions needed for OIDC
 permissions:
   id-token: write
   contents: write
+  security-events: write
 
 jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install black flake8 bandit safety pytest pytest-asyncio pytest-cov
+
+      - name: Code Quality - Black Formatting Check
+        run: |
+          black --check --diff app/ tests/
+
+      - name: Code Quality - Flake8 Linting
+        run: |
+          flake8 app/ tests/ --max-line-length=88 --extend-ignore=E203,W503
+
+      - name: Security Scanning - Bandit
+        run: |
+          bandit -r app/ -f json -o bandit-report.json || true
+          bandit -r app/ -f txt -o bandit-report.txt || true
+
+      - name: Security Scanning - Safety (Dependency Vulnerabilities)
+        run: |
+          safety check --json --output safety-report.json || true
+          safety check --text --output safety-report.txt || true
+
+      - name: Run Unit Tests with Coverage
+        run: |
+          pytest tests/ --cov=app --cov-report=xml --cov-report=term-missing --cov-report=html
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+            bandit-report.txt
+            safety-report.json
+            safety-report.txt
+
   build-and-deploy:
     runs-on: ubuntu-latest
+    needs: run-tests
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
@@ -89,7 +156,7 @@ jobs:
           mkdir -p ~/.local/bin
           mv ./kubectl ~/.local/bin/kubectl
           kubectl version --client
-      
+
       - name: Deploy NylaBank Service Production
         id: deploy-k8s-prod-yaml
         if: ${{ github.ref == 'refs/heads/main' }}

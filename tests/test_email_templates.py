@@ -135,7 +135,7 @@ def test_transaction_notification_email_content():
         description="Test deposit",
         from_account_last4="0001",
         to_account_last4="0002",
-        dashboard_url="https://nylabank.qa.maoney.co/dashboard",
+        dashboard_url="https://nylabankapi.prod.maoney.co/dashboard",
     )
     assert "Sharhan" in html
     assert "Deposit" in html or "deposit" in html

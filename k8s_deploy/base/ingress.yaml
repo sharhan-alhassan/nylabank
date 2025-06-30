@@ -7,7 +7,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: site.com                    # change this
+  - host: nylabankapi.prod.maoney.co
     http:
       paths:
       - backend:
@@ -19,5 +19,5 @@ spec:
         pathType: Prefix
   tls:
   - hosts:
-    - site.com                        # change this
-    secretName: ssl-prod-nylabankservice            # change this
+    - nylabankapi.prod.maoney.co
+    secretName: ssl-prod-nylabankservice           

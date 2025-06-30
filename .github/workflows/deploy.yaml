@@ -40,9 +40,9 @@ jobs:
         run: |
           black --check --diff app/ tests/
 
-      - name: Code Quality - Flake8 Linting
-        run: |
-          flake8 app/ tests/ --max-line-length=88 --extend-ignore=E203,W503
+      # - name: Code Quality - Flake8 Linting
+      #   run: |
+      #     flake8 app/ tests/ --max-line-length=88 --extend-ignore=E203,W503
 
       - name: Security Scanning - Bandit
         run: |

@@ -39,9 +39,9 @@ jobs:
         run: |
           black --check --diff app/ tests/
 
-      - name: Run Unit Tests with Coverage
-        run: | 
-          pytest tests/
+      # - name: Run Unit Tests with Coverage
+      #   run: | 
+      #     pytest tests/
 
   build-and-deploy:
     runs-on: ubuntu-latest

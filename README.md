@@ -46,7 +46,7 @@ A modern, secure banking API for user accounts, transactions, and admin operatio
 - Modular routers: users, accounts, transactions, admin
 - Email notifications (Jinja2 templates)
 
-![Architecture Overview](images/welcome_phone_flash.png)
+<img src="images/welcome_phone_flash.png" alt="Architecture Overview" width="250"/>
 
 ## 🗄️ Database Schemas
 

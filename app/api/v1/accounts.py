@@ -152,7 +152,7 @@ class AccountRouter:
         self,
         account_in: AccountCreate,
         db: AsyncSession = Depends(get_async_session),
-            current_user: User = Depends(get_current_user),
+        current_user: User = Depends(get_current_user),
     ) -> Any:
         """Create new account with auto-generated account number"""
         try:
@@ -308,7 +308,7 @@ class AccountRouter:
         self,
         account_id: UUID,
         db: AsyncSession = Depends(get_async_session),
-            current_user: User = Depends(get_current_user),
+        current_user: User = Depends(get_current_user),
     ) -> Any:
         """Close account (soft delete)"""
         try:
